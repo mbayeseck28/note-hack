@@ -1,4 +1,4 @@
-import React from 'react'
+import { useTodoContext } from "../providers/TodoProvider"
 
 // Composant changeur couleur background
 const Bgcolor = ({color, changebg}) => {
@@ -8,7 +8,9 @@ const Bgcolor = ({color, changebg}) => {
   }
 
 
-const Header = ({changebg}) => {
+const Header = () => {
+  const {changebg} = useTodoContext();
+
   return (
     <div className="card shadow">
         <div className="card-body d-flex justify-content-between flex-wrap">

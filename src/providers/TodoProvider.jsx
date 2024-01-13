@@ -1,14 +1,9 @@
-// import logo from './logo.svg';
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-// import 'bootstrap/dist/js/bootstrap.min.js';
-import Header from './Composants/Header';
-import Formulaire from './Composants/Formulaire';
-import Contenu from './Composants/Contenu';
-import { useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from "react"
 
-function App() {
-  const [entree, setEntree] = useState('');
+const TodoContext = createContext()
+
+const TodoProvider = ({children}) => {
+  const [entree, setEntree] = useState();
   const [textbtn, setTextbtn] = useState('Add');
   const [cleAmodifier, setCleamodif] = useState('');
   const [list, setList] = useState(() => {
@@ -16,7 +11,7 @@ function App() {
     const localStorageUsers = localStorage.getItem('list');
     return localStorageUsers ? JSON.parse(localStorageUsers) : [];
   });
-
+  
   useEffect(() => {
     document.title = 'Note Hack';
     const bg = document.querySelector('.App');
@@ -28,18 +23,13 @@ function App() {
     localStorage.setItem('list', JSON.stringify(list));
   }, [list]); // Ce useEffect s'exécute à chaque changement de list
 
-  function handleChange(e) {
-    e.preventDefault();
-    setEntree(e.target.value);
-  }
-
+  
   function addOrUpdate(e) {
     const condition = textbtn === 'Add';
-    condition ? ajouter(e) : modifier(e);
+    condition ? ajouter() : modifierSub();
   }
 
-  function ajouter(e) {
-    e.preventDefault();
+  const ajouter = () => {
     let currentDate = new Date();
     const dateObject = {
       hour: currentDate.getHours().toString().padStart(2, '0'),
@@ -62,9 +52,16 @@ function App() {
     setEntree('');
   }
 
-  function modifier(e) {
-    e.preventDefault();
+  const modifier = (cle) => {
+    const newList = list.filter((li) => li.id === cle);
+    newList.map((li) => {
+      setEntree(li.titre);
+      setTextbtn('Update');
+      setCleamodif(li.id);
+    });
+  }
 
+  const modifierSub = () => {
     const newList = list.map((item) => {
       if (item.id === cleAmodifier) {
         return {
@@ -80,21 +77,12 @@ function App() {
     setTextbtn('Add');
   }
 
-  function handleUpdate(cle) {
-    const newList = list.filter((li) => li.id === cle);
-    newList.map((li) => {
-      setEntree(li.titre);
-      setTextbtn('Update');
-      setCleamodif(li.id);
-    });
-  }
-
-  function supprimer(cle) {
+  const supprimer = (cle) => {
     const newList = list.filter((list) => list.id !== cle);
     setList(newList);
   }
 
-  function changebg(color) {
+  const changebg = (color) => {
     localStorage.setItem('background', color);
     const bg = document.querySelector('.App');
     let classesActuelles = bg.classList;
@@ -103,47 +91,27 @@ function App() {
       bg.classList.remove(derniereClasse);
     }
     bg.classList.add(localStorage.getItem('background'));
-    // ____
-    // const btn = document.querySelectorAll('.btn-bg');
-    // for (var i = 0; i < btn.length; i++) {
-    //   const btnActuelles = btn[i].classList;
-    //   for (let i = 0; i < btnActuelles.length; i++) {
-    //     const element = btnActuelles[i];
-    //     // console.log(element);
-    //     if (element === color) {
-    //       element.classList.add('btn-backG');
-    //       console.log('Je lai trouvé');
-    //     }
-    //   }
-    //   // Faire quelque chose avec chaque élément, par exemple, afficher le contenu
-    //   // btn[i].classList.add('btn-backG');
-    //   // if (btnActuelles.length > 5) {
-    //   //   btn[i].computedStyleMap.width = '30px';
-    //   //   btn[i].computedStyleMap.height = '30px';
-    //   // }
-    //   // console.log(btnActuelles);
-    // }
+  }
+  
+
+  const contextValue = {
+    entree,
+    setEntree,  
+    list,
+    setList,
+    textbtn,
+    setTextbtn,
+    cleAmodifier,
+    setCleamodif,
+    addOrUpdate,
+    modifier,
+    supprimer,
+    changebg,
   }
 
-  return (
-    <div className="App py-4">
-      <div className="container">
-        <Header changebg={changebg} />
-        <Formulaire
-          handleChange={handleChange}
-          handleSubmit={addOrUpdate}
-          val={entree}
-          textBtn={textbtn}
-        />
-        <Contenu
-          tableau={list}
-          setter={setList}
-          handleUpdate={handleUpdate}
-          handleDelete={supprimer}
-        />
-      </div>
-    </div>
-  );
+  return <TodoContext.Provider value={contextValue}>{children}</TodoContext.Provider>
 }
 
-export default App;
+export const useTodoContext = () => useContext(TodoContext)
+
+export default TodoProvider
