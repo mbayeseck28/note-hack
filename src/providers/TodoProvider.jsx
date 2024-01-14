@@ -7,7 +7,6 @@ const TodoProvider = ({children}) => {
   const [textbtn, setTextbtn] = useState('Add');
   const [cleAmodifier, setCleamodif] = useState('');
   const [list, setList] = useState(() => {
-    // Initialisez avec les données du localStorage ou un tableau vide par défaut
     const localStorageUsers = localStorage.getItem('list');
     return localStorageUsers ? JSON.parse(localStorageUsers) : [];
   });
